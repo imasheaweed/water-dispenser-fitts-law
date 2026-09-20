@@ -1,0 +1,1663 @@
+index.html
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Fitts' Law - Smart Water Dispenser Experiment</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f3f5f7;
+        color: #222;
+    }
+
+    .container {
+        max-width: 1250px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+
+    .subtitle {
+        color: #666;
+        margin-bottom: 25px;
+    }
+
+    .panel {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .config {
+        display: flex;
+        gap: 15px;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    label {
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    input {
+        width: 220px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 15px;
+    }
+
+    button {
+        font-family: inherit;
+    }
+
+    #startBtn {
+        padding: 11px 20px;
+        border: none;
+        border-radius: 6px;
+        background: #1677ff;
+        color: white;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    #startBtn:hover {
+        background: #095dcc;
+    }
+
+    #startBtn:disabled {
+        background: #aaa;
+        cursor: not-allowed;
+    }
+
+    .experiment-layout {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 20px;
+    }
+
+    .dispenser-area {
+        background: #e8edf1;
+        border-radius: 12px;
+        padding: 20px;
+        min-height: 720px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dispenser {
+        width: 500px;
+        height: 680px;
+        max-width: 100%;
+        margin: 0 auto;
+        background: #dfe3e6;
+        border: 3px solid #aeb5ba;
+        border-radius: 25px;
+        position: relative;
+    }
+
+    .dispenser-header {
+        height: 65px;
+        background: #b9c0c5;
+        border-radius: 20px 20px 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #555;
+        text-align: center;
+        padding: 10px;
+    }
+
+    /*
+        FIXED GEOMETRY
+
+        Dispenser width: 500 px
+        Nozzle:
+            left: 215 px
+            width: 70 px
+            center X = 250 px
+
+            top: 407 px
+            height: 45 px
+            center Y = 429.5 px
+
+        Target:
+            center X = 250 px
+            center Y = 429.5 - D
+
+        Therefore, D is the exact vertical
+        center-to-center distance.
+    */
+
+    .nozzle {
+        position: absolute;
+        width: 70px;
+        height: 45px;
+        left: 215px;
+        top: 407px;
+
+        background: #777;
+        border-radius: 8px 8px 20px 20px;
+
+        cursor: pointer;
+        z-index: 5;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+
+        user-select: none;
+    }
+
+    .nozzle::after {
+        content: "";
+
+        position: absolute;
+        width: 30px;
+        height: 45px;
+
+        background: #555;
+
+        top: 35px;
+        left: 20px;
+
+        border-radius: 0 0 15px 15px;
+
+        pointer-events: none;
+    }
+
+    .cup {
+        position: absolute;
+
+        width: 105px;
+        height: 85px;
+
+        left: 197.5px;
+        top: 495px;
+
+        border: 4px solid #888;
+        border-top: none;
+
+        border-radius: 0 0 35px 35px;
+
+        background: rgba(255, 255, 255, 0.55);
+
+        z-index: 3;
+
+        pointer-events: none;
+    }
+
+    .cup-label {
+        position: absolute;
+
+        width: 100%;
+
+        text-align: center;
+
+        top: 585px;
+
+        font-size: 13px;
+        color: #777;
+
+        z-index: 3;
+
+        pointer-events: none;
+    }
+
+    .target {
+        position: absolute;
+
+        transform: translate(-50%, -50%);
+
+        display: none;
+
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 8px;
+
+        background: #1677ff;
+        color: white;
+
+        font-weight: bold;
+        font-size: 12px;
+        text-align: center;
+
+        cursor: pointer;
+        user-select: none;
+
+        z-index: 10;
+
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+
+        padding: 5px;
+        overflow: hidden;
+    }
+
+    .target:hover {
+        background: #095dcc;
+    }
+
+    .distance-line {
+        position: absolute;
+
+        left: 250px;
+
+        width: 2px;
+
+        border-left: 2px dashed #888;
+
+        display: none;
+
+        z-index: 2;
+
+        pointer-events: none;
+    }
+
+    .distance-label {
+        position: absolute;
+
+        left: 260px;
+
+        transform: translateY(-50%);
+
+        display: none;
+
+        font-size: 12px;
+        color: #666;
+
+        background: rgba(255, 255, 255, 0.85);
+
+        padding: 3px 5px;
+
+        border-radius: 4px;
+
+        z-index: 4;
+
+        pointer-events: none;
+    }
+
+    .instruction {
+        text-align: center;
+
+        margin: 15px 0 5px;
+
+        font-weight: bold;
+        color: #333;
+
+        min-height: 22px;
+    }
+
+    .stats {
+        display: grid;
+
+        grid-template-columns: repeat(4, 1fr);
+
+        gap: 10px;
+
+        margin-bottom: 15px;
+    }
+
+    .stat {
+        background: #f5f6f7;
+
+        padding: 12px;
+
+        border-radius: 8px;
+
+        text-align: center;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: #777;
+    }
+
+    .stat-value {
+        font-size: 20px;
+
+        font-weight: bold;
+
+        margin-top: 4px;
+    }
+
+    .status {
+        padding: 10px;
+
+        border-radius: 6px;
+
+        background: #f5f6f7;
+
+        margin-bottom: 15px;
+
+        font-size: 14px;
+    }
+
+    .table-container {
+        max-height: 450px;
+
+        overflow: auto;
+    }
+
+    table {
+        width: 100%;
+
+        border-collapse: collapse;
+
+        font-size: 13px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+
+        border-bottom: 1px solid #ddd;
+
+        text-align: center;
+
+        white-space: nowrap;
+    }
+
+    th {
+        background: #f1f3f4;
+
+        position: sticky;
+
+        top: 0;
+
+        z-index: 2;
+    }
+
+    .export-btn {
+        margin-top: 15px;
+
+        padding: 10px 15px;
+
+        border: none;
+
+        border-radius: 6px;
+
+        background: #333;
+
+        color: white;
+
+        cursor: pointer;
+    }
+
+    .export-btn:disabled {
+        background: #aaa;
+
+        cursor: not-allowed;
+    }
+
+    .condition-box {
+        background: #f5f6f7;
+
+        padding: 12px;
+
+        border-radius: 8px;
+
+        margin-bottom: 10px;
+    }
+
+    .condition-box strong {
+        display: block;
+
+        margin-bottom: 5px;
+    }
+
+    .small-note {
+        color: #777;
+
+        font-size: 12px;
+
+        line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+        .experiment-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Fitts' Law: Smart Water Dispenser</h1>
+
+    <div class="subtitle">
+        Nowadays, people often multitask while getting water, such as holding a phone or other belongings while filling a bottle or paper cup. This makes us wonder: why are the water dispenser buttons sometimes placed so far from where we position our cup or bottle? Although many dispensers already use sensors to detect the cup or bottle, users still need to select the water temperature when multiple options are available. Since the cup or bottle may need to be held with one hand, having a larger button placed closer to the user could make the dispenser easier to operate with only one hand.
+
+In this case, Fitts’ Law is used to investigate how button size and vertical distance affect the performance of selecting the “Pour Water” button.
+    </div>
+
+
+    <!-- CONFIGURATION PANEL -->
+
+    <div class="panel">
+
+        <h2>Experiment Setup</h2>
+
+        <div class="config">
+
+            <div class="field">
+
+                <label for="participantId">
+                    Participant ID
+                </label>
+
+                <input
+                    type="text"
+                    id="participantId"
+                    placeholder="e.g. P001"
+                >
+
+            </div>
+
+            <button id="startBtn">
+                Start Test Session
+            </button>
+
+        </div>
+
+        <p class="small-note">
+            The experiment automatically tests 3 button sizes and
+            4 vertical distances, producing 12 conditions.
+            Each condition contains 10 recorded trials.
+        </p>
+
+    </div>
+
+
+    <!-- EXPERIMENT AREA -->
+
+    <div class="experiment-layout">
+
+        <div class="panel">
+
+            <div class="stats">
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        Condition
+                    </div>
+
+                    <div class="stat-value" id="conditionDisplay">
+                        -
+                    </div>
+
+                </div>
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        Button W
+                    </div>
+
+                    <div class="stat-value" id="widthDisplay">
+                        -
+                    </div>
+
+                </div>
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        Distance D
+                    </div>
+
+                    <div class="stat-value" id="distanceDisplay">
+                        -
+                    </div>
+
+                </div>
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        ID
+                    </div>
+
+                    <div class="stat-value" id="idDisplay">
+                        -
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="status" id="status">
+                Enter a Participant ID and start the session.
+            </div>
+
+
+            <div class="dispenser-area">
+
+                <div class="dispenser" id="dispenser">
+
+                    <div class="dispenser-header">
+                        SMART WATER DISPENSER
+                    </div>
+
+
+                    <!-- FIXED STARTING POINT -->
+
+                    <div class="nozzle" id="nozzle">
+                        START
+                    </div>
+
+
+                    <!-- CUP -->
+
+                    <div class="cup"></div>
+
+                    <div class="cup-label">
+                        Fixed cup position
+                    </div>
+
+
+                    <!-- TARGET -->
+
+                    <div class="target" id="target">
+                        POUR WATER
+                    </div>
+
+
+                    <!-- DISTANCE VISUALIZATION -->
+
+                    <div
+                        class="distance-line"
+                        id="distanceLine">
+                    </div>
+
+                    <div
+                        class="distance-label"
+                        id="distanceLabel">
+                        D
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="instruction" id="instruction">
+                Click "Start Test Session" to begin.
+            </div>
+
+        </div>
+
+
+        <!-- INFORMATION PANEL -->
+
+        <div class="panel">
+
+            <h2>Experiment Information</h2>
+
+            <div class="condition-box">
+
+                <strong>Button Sizes</strong>
+
+                Small: 50 × 50 px<br>
+                Medium: 80 × 80 px<br>
+                Large: 110 × 110 px
+
+            </div>
+
+
+            <div class="condition-box">
+
+                <strong>Vertical Distances</strong>
+
+                100 px<br>
+                150 px<br>
+                200 px<br>
+                300 px
+
+            </div>
+
+
+            <div class="condition-box">
+
+                <strong>Target</strong>
+
+                POUR WATER
+
+            </div>
+
+
+            <div class="condition-box">
+
+                <strong>Movement</strong>
+
+                Fixed START point → Pour Water button
+
+            </div>
+
+
+            <div class="condition-box">
+
+                <strong>Trials</strong>
+
+                10 recorded trials per condition<br>
+                120 recorded movements total
+
+            </div>
+
+
+            <div class="condition-box">
+
+                <strong>Fitts' Law</strong>
+
+                ID = log2(D / W + 1)
+
+            </div>
+
+
+            <p class="small-note">
+
+                The target always appears directly above the
+                nozzle. The dashed line represents the vertical
+                center-to-center distance between the START point
+                and the Pour Water button.
+
+                A miss does not end the trial. The timer continues
+                until the participant successfully clicks the target.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- DATA TABLE -->
+
+    <div class="panel">
+
+        <h2>Recorded Data</h2>
+
+        <div class="table-container">
+
+            <table id="dataTable">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Participant</th>
+                        <th>Trial</th>
+                        <th>Condition</th>
+                        <th>W (px)</th>
+                        <th>D (px)</th>
+                        <th>ID</th>
+                        <th>MT (ms)</th>
+                        <th>Misses</th>
+                        <th>Error</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="dataBody"></tbody>
+
+            </table>
+
+        </div>
+
+
+        <button
+            class="export-btn"
+            id="exportBtn"
+            disabled
+        >
+            Export CSV
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   EXPERIMENT PARAMETERS
+   ========================================================= */
+
+const BUTTON_SIZES = [50, 80, 110];
+
+const DISTANCES = [100, 150, 200, 300];
+
+const RECORDED_TRIALS_PER_CONDITION = 10;
+
+const PRACTICE_TRIALS = 0;
+
+
+/* =========================================================
+   DOM ELEMENTS
+   ========================================================= */
+
+const participantInput =
+    document.getElementById("participantId");
+
+const startBtn =
+    document.getElementById("startBtn");
+
+const dispenser =
+    document.getElementById("dispenser");
+
+const nozzle =
+    document.getElementById("nozzle");
+
+const target =
+    document.getElementById("target");
+
+const conditionDisplay =
+    document.getElementById("conditionDisplay");
+
+const widthDisplay =
+    document.getElementById("widthDisplay");
+
+const distanceDisplay =
+    document.getElementById("distanceDisplay");
+
+const idDisplay =
+    document.getElementById("idDisplay");
+
+const statusDisplay =
+    document.getElementById("status");
+
+const instruction =
+    document.getElementById("instruction");
+
+const distanceLine =
+    document.getElementById("distanceLine");
+
+const distanceLabel =
+    document.getElementById("distanceLabel");
+
+const dataBody =
+    document.getElementById("dataBody");
+
+const exportBtn =
+    document.getElementById("exportBtn");
+
+
+/* =========================================================
+   EXPERIMENT STATE
+   ========================================================= */
+
+let participantId = "";
+
+let conditions = [];
+
+let currentConditionIndex = 0;
+
+let currentCondition = null;
+
+let currentRecordedTrial = 0;
+
+let currentPracticeTrial = 0;
+
+let experimentStarted = false;
+
+let movementActive = false;
+
+let movementStartTime = null;
+
+let misses = 0;
+
+let recordedData = [];
+
+
+/* =========================================================
+   CREATE CONDITIONS
+   ========================================================= */
+
+function createConditions() {
+    const list = [];
+
+    for (const W of BUTTON_SIZES) {
+        for (const D of DISTANCES) {
+            list.push({
+                W: W,
+                D: D,
+                ID: Math.log2(D / W + 1)
+            });
+        }
+    }
+
+    return shuffle(list);
+}
+
+
+/* =========================================================
+   SHUFFLE CONDITIONS
+   ========================================================= */
+
+function shuffle(array) {
+
+    const copy = [...array];
+
+    for (
+        let i = copy.length - 1;
+        i > 0;
+        i--
+    ) {
+
+        const j =
+            Math.floor(Math.random() * (i + 1));
+
+        [
+            copy[i],
+            copy[j]
+        ] = [
+            copy[j],
+            copy[i]
+        ];
+
+    }
+
+    return copy;
+
+}
+
+
+/* =========================================================
+   START SESSION
+   ========================================================= */
+
+startBtn.addEventListener("click", () => {
+
+    participantId =
+        participantInput.value.trim();
+
+    if (!participantId) {
+
+        alert("Please enter a Participant ID.");
+
+        participantInput.focus();
+
+        return;
+
+    }
+
+    experimentStarted = true;
+
+    currentConditionIndex = 0;
+
+    currentRecordedTrial = 0;
+
+    currentPracticeTrial = 0;
+
+    recordedData = [];
+
+    dataBody.innerHTML = "";
+
+    exportBtn.disabled = true;
+
+    conditions = createConditions();
+
+    startBtn.disabled = true;
+
+    participantInput.disabled = true;
+
+    statusDisplay.textContent =
+        "Session started. Complete each movement as instructed.";
+
+    loadCondition();
+
+});
+
+
+/* =========================================================
+   LOAD CONDITION
+   ========================================================= */
+
+function loadCondition() {
+
+    if (
+        currentConditionIndex >=
+        conditions.length
+    ) {
+
+        finishExperiment();
+
+        return;
+
+    }
+
+    currentCondition =
+        conditions[currentConditionIndex];
+
+    currentRecordedTrial = 0;
+
+    currentPracticeTrial = 0;
+
+    updateConditionDisplay();
+
+    prepareNextTrial();
+
+}
+
+
+/* =========================================================
+   UPDATE CONDITION DISPLAY
+   ========================================================= */
+
+function updateConditionDisplay() {
+
+    const W =
+        currentCondition.W;
+
+    const D =
+        currentCondition.D;
+
+    const ID =
+        currentCondition.ID;
+
+    conditionDisplay.textContent =
+        `W${W}/D${D}`;
+
+    widthDisplay.textContent =
+        `${W} px`;
+
+    distanceDisplay.textContent =
+        `${D} px`;
+
+    idDisplay.textContent =
+        ID.toFixed(2);
+
+}
+
+
+/* =========================================================
+   PREPARE NEXT TRIAL
+   ========================================================= */
+
+function prepareNextTrial() {
+
+    movementActive = false;
+
+    movementStartTime = null;
+
+    misses = 0;
+
+    target.style.display = "none";
+
+    distanceLine.style.display = "none";
+
+    distanceLabel.style.display = "none";
+
+
+    if (
+        currentPracticeTrial <
+        PRACTICE_TRIALS
+    ) {
+
+        instruction.textContent =
+            `Practice ${
+                currentPracticeTrial + 1
+            }/${PRACTICE_TRIALS}: click START.`;
+
+        statusDisplay.textContent =
+            "Practice trial — this trial will not be recorded.";
+
+    } else {
+
+        instruction.textContent =
+            `Trial ${
+                currentRecordedTrial + 1
+            }/${RECORDED_TRIALS_PER_CONDITION}: click START.`;
+
+        statusDisplay.textContent =
+            "Click START to begin the movement.";
+
+    }
+
+}
+
+
+/* =========================================================
+   START MOVEMENT FROM NOZZLE
+   ========================================================= */
+
+nozzle.addEventListener("click", (event) => {
+
+    /*
+        Prevent the START click from bubbling to
+        the dispenser's miss-detection listener.
+    */
+
+    event.stopPropagation();
+
+    if (!experimentStarted) {
+        return;
+    }
+
+    if (movementActive) {
+        return;
+    }
+
+    positionTarget();
+
+    /*
+        The timer starts when the participant
+        clicks the fixed starting point.
+    */
+
+    movementStartTime =
+        performance.now();
+
+    movementActive = true;
+
+    instruction.textContent =
+        "Move upward and click the POUR WATER button.";
+
+    statusDisplay.textContent =
+        "Movement in progress...";
+
+});
+
+
+/* =========================================================
+   POSITION TARGET
+   ========================================================= */
+
+function positionTarget() {
+
+    const W =
+        currentCondition.W;
+
+    const D =
+        currentCondition.D;
+
+
+    /*
+        Exact fixed geometry:
+
+        Nozzle center:
+            X = 250 px
+            Y = 429.5 px
+
+        Target center:
+            X = 250 px
+            Y = 429.5 - D
+    */
+
+    const nozzleCenterX = 250;
+
+    const nozzleCenterY = 429.5;
+
+    const targetCenterX =
+        nozzleCenterX;
+
+    const targetCenterY =
+        nozzleCenterY - D;
+
+
+    /*
+        Square target:
+        W = both width and height
+    */
+
+    target.style.width =
+        `${W}px`;
+
+    target.style.height =
+        `${W}px`;
+
+    target.style.left =
+        `${targetCenterX}px`;
+
+    target.style.top =
+        `${targetCenterY}px`;
+
+    target.textContent =
+        "POUR WATER";
+
+    target.style.display =
+        "flex";
+
+
+    /*
+        Draw the exact vertical distance.
+    */
+
+    distanceLine.style.top =
+        `${targetCenterY}px`;
+
+    distanceLine.style.height =
+        `${D}px`;
+
+    distanceLine.style.display =
+        "block";
+
+    distanceLabel.style.top =
+        `${targetCenterY + D / 2}px`;
+
+    distanceLabel.textContent =
+        `D = ${D}px`;
+
+    distanceLabel.style.display =
+        "block";
+
+}
+
+
+/* =========================================================
+   SUCCESSFUL TARGET CLICK
+   ========================================================= */
+
+target.addEventListener("click", (event) => {
+
+    event.stopPropagation();
+
+    if (!movementActive) {
+        return;
+    }
+
+    const endTime =
+        performance.now();
+
+    const movementTime =
+        endTime - movementStartTime;
+
+    movementActive = false;
+
+    target.style.display = "none";
+
+    distanceLine.style.display = "none";
+
+    distanceLabel.style.display = "none";
+
+
+    /*
+        PRACTICE TRIAL
+    */
+
+    if (
+        currentPracticeTrial <
+        PRACTICE_TRIALS
+    ) {
+
+        currentPracticeTrial++;
+
+        instruction.textContent =
+            "Practice completed.";
+
+        statusDisplay.textContent =
+            "Practice movement completed. Preparing next trial.";
+
+        setTimeout(() => {
+
+            prepareNextTrial();
+
+        }, 600);
+
+        return;
+
+    }
+
+
+    /*
+        RECORDED TRIAL
+    */
+
+    currentRecordedTrial++;
+
+    const W =
+        currentCondition.W;
+
+    const D =
+        currentCondition.D;
+
+    const ID =
+        currentCondition.ID;
+
+    const error =
+        misses > 0
+            ? "Yes"
+            : "No";
+
+
+    const rowData = {
+
+        participant: participantId,
+
+        trial:
+            recordedData.length + 1,
+
+        condition:
+            `W${W}-D${D}`,
+
+        W: W,
+
+        D: D,
+
+        ID: ID,
+
+        MT: movementTime,
+
+        misses: misses,
+
+        error: error
+
+    };
+
+
+    recordedData.push(rowData);
+
+    addDataRow(rowData);
+
+
+    statusDisplay.textContent =
+        `Successful selection: ${
+            movementTime.toFixed(1)
+        } ms`;
+
+    instruction.textContent =
+        "Selection recorded.";
+
+
+    /*
+        NEXT TRIAL OR NEXT CONDITION
+    */
+
+    if (
+        currentRecordedTrial <
+        RECORDED_TRIALS_PER_CONDITION
+    ) {
+
+        setTimeout(() => {
+
+            prepareNextTrial();
+
+        }, 600);
+
+    } else {
+
+        currentConditionIndex++;
+
+        setTimeout(() => {
+
+            loadCondition();
+
+        }, 900);
+
+    }
+
+});
+
+
+/* =========================================================
+   MISS DETECTION
+   ========================================================= */
+
+dispenser.addEventListener("click", (event) => {
+
+    if (!movementActive) {
+        return;
+    }
+
+    /*
+        Ignore target clicks.
+        The target has its own click handler.
+    */
+
+    if (
+        event.target === target
+    ) {
+        return;
+    }
+
+    /*
+        Ignore the nozzle/start point.
+    */
+
+    if (
+        event.target === nozzle
+    ) {
+        return;
+    }
+
+    /*
+        Ignore clicks on the cup or decorative elements.
+        These are not counted as movement misses.
+    */
+
+    if (
+        event.target.classList.contains("cup") ||
+        event.target.classList.contains("cup-label") ||
+        event.target.classList.contains("dispenser-header")
+    ) {
+
+        return;
+
+    }
+
+    /*
+        Any other click in the dispenser area
+        counts as a miss.
+
+        The timer continues running.
+    */
+
+    misses++;
+
+    statusDisplay.textContent =
+        `Miss recorded: ${misses}. Keep moving to POUR WATER.`;
+
+});
+
+
+/* =========================================================
+   ADD DATA ROW
+   ========================================================= */
+
+function addDataRow(data) {
+
+    const row =
+        document.createElement("tr");
+
+    row.innerHTML = `
+
+        <td>${escapeHTML(data.participant)}</td>
+
+        <td>${data.trial}</td>
+
+        <td>${data.condition}</td>
+
+        <td>${data.W}</td>
+
+        <td>${data.D}</td>
+
+        <td>${data.ID.toFixed(2)}</td>
+
+        <td>${data.MT.toFixed(1)}</td>
+
+        <td>${data.misses}</td>
+
+        <td>${data.error}</td>
+
+    `;
+
+    dataBody.appendChild(row);
+
+}
+
+
+/* =========================================================
+   BASIC HTML ESCAPING
+   ========================================================= */
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================================
+   FINISH EXPERIMENT
+   ========================================================= */
+
+function finishExperiment() {
+
+    experimentStarted = false;
+
+    movementActive = false;
+
+    target.style.display = "none";
+
+    distanceLine.style.display = "none";
+
+    distanceLabel.style.display = "none";
+
+    conditionDisplay.textContent =
+        "DONE";
+
+    widthDisplay.textContent =
+        "-";
+
+    distanceDisplay.textContent =
+        "-";
+
+    idDisplay.textContent =
+        "-";
+
+    statusDisplay.textContent =
+        "EXPERIMENT COMPLETED.";
+
+    instruction.textContent =
+        `All ${recordedData.length} recorded movements have been completed.`;
+
+    completionMessage.textContent =
+        `EXPERIMENT COMPLETED — All ${recordedData.length} trials have been completed.`;
+
+    completionMessage.style.display = "block";
+
+    startBtn.disabled = false;
+
+    participantInput.disabled = false;
+
+    exportBtn.disabled =
+        recordedData.length === 0;
+}
+
+/* =========================================================
+   CSV EXPORT
+   ========================================================= */
+
+exportBtn.addEventListener("click", () => {
+
+    if (
+        recordedData.length === 0
+    ) {
+
+        return;
+
+    }
+
+    let csv =
+        "Participant,Trial,Condition,W (px),D (px),ID,MT (ms),Misses,Error\n";
+
+
+    recordedData.forEach(data => {
+
+        csv += [
+
+            csvEscape(data.participant),
+
+            data.trial,
+
+            data.condition,
+
+            data.W,
+
+            data.D,
+
+            data.ID.toFixed(4),
+
+            data.MT.toFixed(3),
+
+            data.misses,
+
+            data.error
+
+        ].join(",") + "\n";
+
+    });
+
+
+    /*
+        Add summary section.
+    */
+
+    csv += "\n\nCondition Summary\n";
+
+    csv +=
+        "Condition,W (px),D (px),ID,Mean MT (ms),Error Rate (%)\n";
+
+
+    const groups = {};
+
+
+    recordedData.forEach(data => {
+
+        const key =
+            data.condition;
+
+        if (!groups[key]) {
+
+            groups[key] = [];
+
+        }
+
+        groups[key].push(data);
+
+    });
+
+
+    Object.values(groups).forEach(group => {
+
+        const first =
+            group[0];
+
+        const meanMT =
+            group.reduce(
+                (sum, data) =>
+                    sum + data.MT,
+                0
+            ) / group.length;
+
+
+        const errorRate =
+            (
+                group.filter(
+                    data =>
+                        data.error === "Yes"
+                ).length
+                / group.length
+            ) * 100;
+
+
+        csv += [
+
+            first.condition,
+
+            first.W,
+
+            first.D,
+
+            first.ID.toFixed(4),
+
+            meanMT.toFixed(3),
+
+            errorRate.toFixed(2)
+
+        ].join(",") + "\n";
+
+    });
+
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+    link.href =
+        url;
+
+    link.download =
+        `fitts_law_${participantId}.csv`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+});
+
+
+/* =========================================================
+   CSV ESCAPING
+   ========================================================= */
+
+function csvEscape(value) {
+
+    const stringValue =
+        String(value);
+
+    if (
+        /[",\n]/.test(stringValue)
+    ) {
+
+        return `"${stringValue.replace(/"/g, '""')}"`;
+
+    }
+
+    return stringValue;
+
+}
+
+</script>
+
+</body>
+</html>
