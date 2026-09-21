@@ -28,7 +28,7 @@ $$MT = a + b \cdot ID$$
 ---
 ### 📊 Summary of Experimental Data
 ### 🎥 Demonstration
-[Video Experiment Link]([https://YOUR_VIDEO_URL_HERE](https://drive.google.com/file/d/1eVfIasHWV1cjwCF92E1LjUwwtHmGMnp1/view?usp=sharing))
+[Video Experiment Link](https://drive.google.com/file/d/1eVfIasHWV1cjwCF92E1LjUwwtHmGMnp1/view?usp=sharing)
 
 | Condition | W (px) | D (px) | Index of Difficulty (ID) | Average Time (ms) | Total Misses | Error Rate (%) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
