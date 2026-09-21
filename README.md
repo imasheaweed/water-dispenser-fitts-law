@@ -1,4 +1,4 @@
-# Smart Water Dispenser — Fitts' Law HCI Study
+<img width="1022" height="619" alt="Scatter Plot Water Dispenser" src="https://github.com/user-attachments/assets/a782dc40-1849-43cf-bf40-e80b9a9b2857" /># Smart Water Dispenser — Fitts' Law HCI Study
 
 🔗 **[Try the Live Interactive Experiment Here](https://imasheaweed.github.io/water-dispenser-fitts-law/)**
 
@@ -35,7 +35,7 @@ $$MT = a + b \cdot ID$$
 - **Target Sizes ($W$):** 50px, 80px, 110px
 - **Vertical Distances ($D$):** 100px, 150px, 200px, 300px
 - **Data Collection:** Automated logging of 120 trials per participant with full CSV data export.
-
+---
 ### 📊 Summary of Experimental Data
 
 | Condition | W (px) | D (px) | Index of Difficulty (ID) | Average Time (ms) | Total Misses | Error Rate (%) |
@@ -62,6 +62,8 @@ Looking at the data from the 12 experimental conditions, there is a clear linear
 
 Using linear regression ($y = mx + c$) to calculate the empirical Fitts' Law equation for this water dispenser interface:
 $$MT = 538.57 + 177.80 \times ID$$
+
+![Fitts' Law Scatter Plot](Scatter%20Plot%20Water%20Dispenser.png)
 
 #### Key Observations
 Both target distance and button size had a clear impact on user performance. For instance, keeping the button size constant at $W = 110\text{ px}$, increasing the distance from $100\text{ px}$ to $300\text{ px}$ raised the index of difficulty from $0.93$ to $1.90\text{ bits}$, causing the average movement time to increase from $624.23\text{ ms}$ to $773.18\text{ ms}$. Similarly, shrinking the button size slowed down selection times significantly; at a fixed distance of $D = 300\text{ px}$, reducing $W$ from $110\text{ px}$ to $50\text{ px}$ increased difficulty to $2.81\text{ bits}$ and extended movement time to $976.67\text{ ms}$. We also observed $10\%$ error rates on conditions with smaller targets at longer distances ($W = 80\text{ px}$ and $W = 110\text{ px}$ at $D = 150\text{–}300\text{ px}$), which shows that single-handed operation suffers precision loss when targets are harder to reach
