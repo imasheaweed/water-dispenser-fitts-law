@@ -1,4 +1,4 @@
-<img width="1022" height="619" alt="Scatter Plot Water Dispenser" src="https://github.com/user-attachments/assets/a782dc40-1849-43cf-bf40-e80b9a9b2857" /># Smart Water Dispenser — Fitts' Law HCI Study
+# Smart Water Dispenser — Fitts' Law HCI Study
 
 🔗 **[Try the Live Interactive Experiment Here](https://imasheaweed.github.io/water-dispenser-fitts-law/)**
 
@@ -7,23 +7,13 @@
 ## 📋 Scenario (The HCI Problem)
 In daily life, these days people frequently multitask while using a water dispenser—such as holding a cup or bottle and also a smartphone or other things in other hand.  While many modern dispensers feature automatic cup detection sensors, yet users must still manually select settings like water temperature or confirm pouring. Because one hand is occupied, having small buttons placed high above or far from the cup placement area forces awkward hand reaches, increasing movement time ($MT$) and error rates.
 
-## 💡 Innovation (The Design Idea)
-Exploring this, Fitts' Law is used to evaluate and redesign the interface logic for single-handed dispenser operation. It is recommended to bring essential touch targets (warm and cold buttons) closer to the cup resting area (reducing distance $D$) and expanding the target contact zone (increasing width $W$). While considering Index of Difficulty, button for hot water temperature can still be put slightly higher and smaller for safety reason.
-
-## 🚀 Application (Real-World Use Cases)
-- **Accessible & Single-Handed Interfaces:** Enhancing interface usability for individuals with limited mobility, parents holding children, outpatients holding documents or users carrying items.
-
 ---
-
 ## 📐 Fitts' Law Model & Custom Formula
 
 ### Theoretical Model
 This experiment uses the Shannon formulation of Fitts' Law to calculate the Index of Difficulty ($ID$):
 
 $$ID = \log_2\left(\frac{D}{W} + 1\right)$$
-
-### Custom Empirical Formula
-Based on regression analysis of our collected participant trial data, our empirically derived values for reaction/delay time ($a$) and movement speed penalty ($b$) yield the following predictive equation:
 
 $$MT = a + b \cdot ID$$
 
@@ -37,6 +27,8 @@ $$MT = a + b \cdot ID$$
 - **Data Collection:** Automated logging of 120 trials per participant with full CSV data export.
 ---
 ### 📊 Summary of Experimental Data
+### 🎥 Demonstration
+[Video Experiment Link]([https://YOUR_VIDEO_URL_HERE](https://drive.google.com/file/d/1eVfIasHWV1cjwCF92E1LjUwwtHmGMnp1/view?usp=sharing))
 
 | Condition | W (px) | D (px) | Index of Difficulty (ID) | Average Time (ms) | Total Misses | Error Rate (%) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -74,7 +66,7 @@ Both target distance and button size had a clear impact on user performance. For
 
 ---
 
-### Design Implications for Smart Water Dispensers
+**####💡 Innovation - Design Implications for Smart Water Dispensers**
 
 These results directly support our proposed layout for single-handed dispenser operation:
 
@@ -85,3 +77,7 @@ These results directly support our proposed layout for single-handed dispenser o
 - **Hot Water Button (Safety Design):**
   - **Design Choice:** Intentionally make the Hot Water button **smaller ($W \downarrow$)** and place it **higher up ($D \uparrow$)**.
   - **Why:** By intentionally raising difficulty to $2.5\text{–}3.0\text{ bits}$, selection time slows down to around ~$950\text{–}1000\text{ ms}$ and requires more focus. This deliberate delay acts as a built-in safety measure to prevent accidental scalding misclicks during single-handed use.
+
+
+## 🚀 Application (Real-World Use Cases)
+- **Accessible & Single-Handed Interfaces:** Enhancing interface usability for individuals with limited mobility, parents holding children, outpatients holding documents or users carrying items.
