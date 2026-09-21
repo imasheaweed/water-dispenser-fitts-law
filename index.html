@@ -133,27 +133,6 @@
         padding: 10px;
     }
 
-    /*
-        FIXED GEOMETRY
-
-        Dispenser width: 500 px
-        Nozzle:
-            left: 215 px
-            width: 70 px
-            center X = 250 px
-
-            top: 407 px
-            height: 45 px
-            center Y = 429.5 px
-
-        Target:
-            center X = 250 px
-            center Y = 429.5 - D
-
-        Therefore, D is the exact vertical
-        center-to-center distance.
-    */
-
     .nozzle {
         position: absolute;
         width: 70px;
@@ -709,7 +688,7 @@ In this case, Fitts’ Law is used to investigate how button size and vertical d
 
     <div class="panel">
 
-        <h2>Recorded Data</h2>
+        <h2>Recorded Condition Summary</h2>
 
         <div class="table-container">
 
@@ -719,11 +698,10 @@ In this case, Fitts’ Law is used to investigate how button size and vertical d
 
                     <tr>
 
-                        <th>Participant</th>
                         <th>Condition</th>
                         <th>W (px)</th>
                         <th>D (px)</th>
-                        <th>ID</th>
+                        <th>ID (bits)</th>
                         <th>Mean MT (ms)</th>
                         <th>Total Misses</th>
                         <th>Error Rate (%)</th>
@@ -732,9 +710,9 @@ In this case, Fitts’ Law is used to investigate how button size and vertical d
 
                 </thead>
 
-                <tbody id="dataBody"></tbody>
-                   <tr>
-                        <td colspan="8" style="color: #888; padding: 20px;">
+                <tbody id="dataBody">
+                    <tr>
+                        <td colspan="7" style="color: #888; padding: 20px;">
                             Summary data will appear here after completing all 12 conditions.
                         </td>
                     </tr>
@@ -924,11 +902,9 @@ startBtn.addEventListener("click", () => {
 
     currentRecordedTrial = 0;
 
-    currentPracticeTrial = 0;
-
     recordedData = [];
 
-    dataBody.innerHTML = `<tr><td colspan="8" style="color: #888; padding: 20px;">Session in progress... Summary will generate upon completion.</td></tr>`;
+    dataBody.innerHTML = `<tr><td colspan="7" style="color: #888; padding: 20px;">Session in progress... Summary will generate upon completion.</td></tr>`;
 
     exportBtn.disabled = true;
 
@@ -967,8 +943,6 @@ function loadCondition() {
         conditions[currentConditionIndex];
 
     currentRecordedTrial = 0;
-
-    currentPracticeTrial = 0;
 
     updateConditionDisplay();
 
@@ -1025,15 +999,13 @@ function prepareNextTrial() {
 
     distanceLabel.style.display = "none";
 
-        instruction.textContent =
-            `Trial ${
-                currentRecordedTrial + 1
-            }/${RECORDED_TRIALS_PER_CONDITION}: click START.`;
+    instruction.textContent =
+        `Trial ${
+            currentRecordedTrial + 1
+        }/${RECORDED_TRIALS_PER_CONDITION}: click START.`;
 
-        statusDisplay.textContent =
-            "Click START to begin the movement.";
-
-    }
+    statusDisplay.textContent =
+        "Click START to begin the movement.";
 
 }
 
@@ -1043,11 +1015,6 @@ function prepareNextTrial() {
    ========================================================= */
 
 nozzle.addEventListener("click", (event) => {
-
-    /*
-        Prevent the START click from bubbling to
-        the dispenser's miss-detection listener.
-    */
 
     event.stopPropagation();
 
@@ -1060,11 +1027,6 @@ nozzle.addEventListener("click", (event) => {
     }
 
     positionTarget();
-
-    /*
-        The timer starts when the participant
-        clicks the fixed starting point.
-    */
 
     movementStartTime =
         performance.now();
@@ -1092,19 +1054,6 @@ function positionTarget() {
     const D =
         currentCondition.D;
 
-
-    /*
-        Exact fixed geometry:
-
-        Nozzle center:
-            X = 250 px
-            Y = 429.5 px
-
-        Target center:
-            X = 250 px
-            Y = 429.5 - D
-    */
-
     const nozzleCenterX = 250;
 
     const nozzleCenterY = 429.5;
@@ -1114,12 +1063,6 @@ function positionTarget() {
 
     const targetCenterY =
         nozzleCenterY - D;
-
-
-    /*
-        Square target:
-        W = both width and height
-    */
 
     target.style.width =
         `${W}px`;
@@ -1138,11 +1081,6 @@ function positionTarget() {
 
     target.style.display =
         "flex";
-
-
-    /*
-        Draw the exact vertical distance.
-    */
 
     distanceLine.style.top =
         `${targetCenterY}px`;
@@ -1191,11 +1129,6 @@ target.addEventListener("click", (event) => {
 
     distanceLabel.style.display = "none";
 
-
-    /*
-        RECORDED TRIAL
-    */
-
     currentRecordedTrial++;
 
     const W =
@@ -1211,7 +1144,6 @@ target.addEventListener("click", (event) => {
         misses > 0
             ? "Yes"
             : "No";
-
 
     const rowData = {
 
@@ -1237,11 +1169,7 @@ target.addEventListener("click", (event) => {
 
     };
 
-
     recordedData.push(rowData);
-
-    addDataRow(rowData);
-
 
     statusDisplay.textContent =
         `Successful selection: ${
@@ -1250,11 +1178,6 @@ target.addEventListener("click", (event) => {
 
     instruction.textContent =
         "Selection recorded.";
-
-
-    /*
-        NEXT TRIAL OR NEXT CONDITION
-    */
 
     if (
         currentRecordedTrial <
@@ -1292,31 +1215,17 @@ dispenser.addEventListener("click", (event) => {
         return;
     }
 
-    /*
-        Ignore target clicks.
-        The target has its own click handler.
-    */
-
     if (
         event.target === target
     ) {
         return;
     }
 
-    /*
-        Ignore the nozzle/start point.
-    */
-
     if (
         event.target === nozzle
     ) {
         return;
     }
-
-    /*
-        Ignore clicks on the cup or decorative elements.
-        These are not counted as movement misses.
-    */
 
     if (
         event.target.classList.contains("cup") ||
@@ -1327,13 +1236,6 @@ dispenser.addEventListener("click", (event) => {
         return;
 
     }
-
-    /*
-        Any other click in the dispenser area
-        counts as a miss.
-
-        The timer continues running.
-    */
 
     misses++;
 
@@ -1391,10 +1293,7 @@ function finishExperiment() {
         "EXPERIMENT COMPLETED.";
 
     instruction.textContent =
-        `All ${recordedData.length} recorded movements have been completed.`;
-
-    completionMessage.textContent =
-        `EXPERIMENT COMPLETED — All ${recordedData.length} trials have been completed.`;
+        `EXPERIMENT COMPLETED — All ${recordedData.length} recorded movements have been completed.`;
 
     startBtn.disabled = false;
 
@@ -1403,8 +1302,9 @@ function finishExperiment() {
     exportBtn.disabled =
         recordedData.length === 0;
 
-   renderSummaryTable();
+    renderSummaryTable();
 }
+
 
 /* =========================================================
    RENDER AGGREGATED SUMMARY TABLE (12 ROWS)
