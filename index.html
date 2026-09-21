@@ -720,20 +720,25 @@ In this case, Fitts’ Law is used to investigate how button size and vertical d
                     <tr>
 
                         <th>Participant</th>
-                        <th>Trial</th>
                         <th>Condition</th>
                         <th>W (px)</th>
                         <th>D (px)</th>
                         <th>ID</th>
-                        <th>MT (ms)</th>
-                        <th>Misses</th>
-                        <th>Error</th>
+                        <th>Mean MT (ms)</th>
+                        <th>Total Misses</th>
+                        <th>Error Rate (%)</th>
 
                     </tr>
 
                 </thead>
 
                 <tbody id="dataBody"></tbody>
+                   <tr>
+                        <td colspan="8" style="color: #888; padding: 20px;">
+                            Summary data will appear here after completing all 12 conditions.
+                        </td>
+                    </tr>
+                </tbody>
 
             </table>
 
@@ -764,8 +769,6 @@ const BUTTON_SIZES = [50, 80, 110];
 const DISTANCES = [100, 150, 200, 300];
 
 const RECORDED_TRIALS_PER_CONDITION = 10;
-
-const PRACTICE_TRIALS = 0;
 
 
 /* =========================================================
@@ -831,8 +834,6 @@ let currentConditionIndex = 0;
 let currentCondition = null;
 
 let currentRecordedTrial = 0;
-
-let currentPracticeTrial = 0;
 
 let experimentStarted = false;
 
@@ -927,7 +928,7 @@ startBtn.addEventListener("click", () => {
 
     recordedData = [];
 
-    dataBody.innerHTML = "";
+    dataBody.innerHTML = `<tr><td colspan="8" style="color: #888; padding: 20px;">Session in progress... Summary will generate upon completion.</td></tr>`;
 
     exportBtn.disabled = true;
 
@@ -1023,22 +1024,6 @@ function prepareNextTrial() {
     distanceLine.style.display = "none";
 
     distanceLabel.style.display = "none";
-
-
-    if (
-        currentPracticeTrial <
-        PRACTICE_TRIALS
-    ) {
-
-        instruction.textContent =
-            `Practice ${
-                currentPracticeTrial + 1
-            }/${PRACTICE_TRIALS}: click START.`;
-
-        statusDisplay.textContent =
-            "Practice trial — this trial will not be recorded.";
-
-    } else {
 
         instruction.textContent =
             `Trial ${
@@ -1208,34 +1193,6 @@ target.addEventListener("click", (event) => {
 
 
     /*
-        PRACTICE TRIAL
-    */
-
-    if (
-        currentPracticeTrial <
-        PRACTICE_TRIALS
-    ) {
-
-        currentPracticeTrial++;
-
-        instruction.textContent =
-            "Practice completed.";
-
-        statusDisplay.textContent =
-            "Practice movement completed. Preparing next trial.";
-
-        setTimeout(() => {
-
-            prepareNextTrial();
-
-        }, 600);
-
-        return;
-
-    }
-
-
-    /*
         RECORDED TRIAL
     */
 
@@ -1387,42 +1344,6 @@ dispenser.addEventListener("click", (event) => {
 
 
 /* =========================================================
-   ADD DATA ROW
-   ========================================================= */
-
-function addDataRow(data) {
-
-    const row =
-        document.createElement("tr");
-
-    row.innerHTML = `
-
-        <td>${escapeHTML(data.participant)}</td>
-
-        <td>${data.trial}</td>
-
-        <td>${data.condition}</td>
-
-        <td>${data.W}</td>
-
-        <td>${data.D}</td>
-
-        <td>${data.ID.toFixed(2)}</td>
-
-        <td>${data.MT.toFixed(1)}</td>
-
-        <td>${data.misses}</td>
-
-        <td>${data.error}</td>
-
-    `;
-
-    dataBody.appendChild(row);
-
-}
-
-
-/* =========================================================
    BASIC HTML ESCAPING
    ========================================================= */
 
@@ -1439,7 +1360,7 @@ function escapeHTML(value) {
 
 
 /* =========================================================
-   FINISH EXPERIMENT
+   FINISH EXPERIMENT & RENDER AGGREGATED TABLE
    ========================================================= */
 
 function finishExperiment() {
@@ -1475,15 +1396,66 @@ function finishExperiment() {
     completionMessage.textContent =
         `EXPERIMENT COMPLETED — All ${recordedData.length} trials have been completed.`;
 
-    completionMessage.style.display = "block";
-
     startBtn.disabled = false;
 
     participantInput.disabled = false;
 
     exportBtn.disabled =
         recordedData.length === 0;
+
+   renderSummaryTable();
 }
+
+/* =========================================================
+   RENDER AGGREGATED SUMMARY TABLE (12 ROWS)
+   ========================================================= */
+
+function renderSummaryTable() {
+
+    dataBody.innerHTML = "";
+
+    const groups = {};
+
+    recordedData.forEach(data => {
+
+        const key = data.condition;
+
+        if (!groups[key]) {
+            groups[key] = [];
+        }
+
+        groups[key].push(data);
+
+    });
+
+    Object.values(groups).forEach(group => {
+
+        const first = group[0];
+
+        const meanMT = group.reduce((sum, d) => sum + d.MT, 0) / group.length;
+
+        const totalMisses = group.reduce((sum, d) => sum + d.misses, 0);
+
+        const errorRate = (group.filter(d => d.error === "Yes").length / group.length) * 100;
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td><b>${first.condition}</b></td>
+            <td>${first.W}</td>
+            <td>${first.D}</td>
+            <td>${first.ID.toFixed(2)}</td>
+            <td><b>${meanMT.toFixed(1)}</b></td>
+            <td>${totalMisses}</td>
+            <td>${errorRate.toFixed(1)}%</td>
+        `;
+
+        dataBody.appendChild(row);
+
+    });
+
+}
+
 
 /* =========================================================
    CSV EXPORT
@@ -1499,9 +1471,7 @@ exportBtn.addEventListener("click", () => {
 
     }
 
-    let csv =
-        "Participant,Trial,Condition,W (px),D (px),ID,MT (ms),Misses,Error\n";
-
+    let csv = "Participant,Trial,Condition,W (px),D (px),ID,MT (ms),Misses,Error\n";
 
     recordedData.forEach(data => {
 
@@ -1529,58 +1499,33 @@ exportBtn.addEventListener("click", () => {
 
     });
 
+    csv += "\n\nCondition Summary Table\n";
 
-    /*
-        Add summary section.
-    */
-
-    csv += "\n\nCondition Summary\n";
-
-    csv +=
-        "Condition,W (px),D (px),ID,Mean MT (ms),Error Rate (%)\n";
-
+    csv += "Condition,W (px),D (px),ID,Mean MT (ms),Total Misses,Error Rate (%)\n";
 
     const groups = {};
 
-
     recordedData.forEach(data => {
 
-        const key =
-            data.condition;
+        const key = data.condition;
 
         if (!groups[key]) {
-
             groups[key] = [];
-
         }
 
         groups[key].push(data);
 
     });
 
-
     Object.values(groups).forEach(group => {
 
-        const first =
-            group[0];
+        const first = group[0];
 
-        const meanMT =
-            group.reduce(
-                (sum, data) =>
-                    sum + data.MT,
-                0
-            ) / group.length;
+        const meanMT = group.reduce((sum, d) => sum + d.MT, 0) / group.length;
 
+        const totalMisses = group.reduce((sum, d) => sum + d.misses, 0);
 
-        const errorRate =
-            (
-                group.filter(
-                    data =>
-                        data.error === "Yes"
-                ).length
-                / group.length
-            ) * 100;
-
+        const errorRate = (group.filter(d => d.error === "Yes").length / group.length) * 100;
 
         csv += [
 
@@ -1594,35 +1539,23 @@ exportBtn.addEventListener("click", () => {
 
             meanMT.toFixed(3),
 
+            totalMisses,
+
             errorRate.toFixed(2)
 
         ].join(",") + "\n";
 
     });
 
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
 
-    const blob =
-        new Blob(
-            [csv],
-            {
-                type:
-                    "text/csv;charset=utf-8;"
-            }
-        );
+    const url = URL.createObjectURL(blob);
 
+    const link = document.createElement("a");
 
-    const url =
-        URL.createObjectURL(blob);
+    link.href = url;
 
-
-    const link =
-        document.createElement("a");
-
-    link.href =
-        url;
-
-    link.download =
-        `fitts_law_${participantId}.csv`;
+    link.download = `fitts_law_${participantId}.csv`;
 
     document.body.appendChild(link);
 
@@ -1641,12 +1574,9 @@ exportBtn.addEventListener("click", () => {
 
 function csvEscape(value) {
 
-    const stringValue =
-        String(value);
+    const stringValue = String(value);
 
-    if (
-        /[",\n]/.test(stringValue)
-    ) {
+    if (/[",\n]/.test(stringValue)) {
 
         return `"${stringValue.replace(/"/g, '""')}"`;
 
